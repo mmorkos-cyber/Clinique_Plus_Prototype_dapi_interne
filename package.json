@@ -1,0 +1,24 @@
+{
+  "name": "clinique_plus_prototype_dapi_interne",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmorkos-cyber/Clinique_Plus_Prototype_dapi_interne.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mmorkos-cyber/Clinique_Plus_Prototype_dapi_interne/issues"
+  },
+  "homepage": "https://github.com/mmorkos-cyber/Clinique_Plus_Prototype_dapi_interne#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
