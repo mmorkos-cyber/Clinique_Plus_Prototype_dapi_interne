@@ -24,6 +24,7 @@ function executer(sql) {
         db.run(sql, (err) => {
             if (err) {
                 console.log(err.message);
+                return reject(err);
             }
             else {
                 console.log("SQL éxécute avec succés");
@@ -37,6 +38,7 @@ function fermerConnexion() {
         db.close((err) => {
             if (err) {
                 console.error('Erreur de fermeture de la connexion:', err.message);
+                return reject(err);
             } else {
                 console.log('Connexion fermée.');
                 resolve();
@@ -52,6 +54,7 @@ function login(mail, password) {
         db.get(reqSql, [mail, password], (err, rows) => {
             if (err) {
                 console.log(err.message);
+                return reject(err);
             }
             if (rows) {
                 console.log(rows);
@@ -67,6 +70,7 @@ function getUserById(userId) {
         db.get(reqSql, [userId], (err, rows) => {
             if (err) {
                 console.log(err.message);
+                return reject(err);
             }
             if (rows) {
                 console.log(rows);
@@ -76,6 +80,37 @@ function getUserById(userId) {
     });
 }
 
+function ajouterUser(mail, password, role) {
+    return new Promise((resolve, reject) => {
+        db.run("INSERT OR IGNORE INTO users (mail, password, role) VALUES (?, ?, ?) ;",
+            [mail, password, role], function (err) {
+                if (err) {
+                    console.log(err.message);
+                    return reject(err);
+                }
+                else {
+                    console.log("Utilisateur ajouté avec succés");
+                    resolve(this.lastID);
+                }
+            });
+    });
+}
+
+function listUsers() {
+     let reqSql = `select id,mail,role from users`;
+    return new Promise((resolve, reject) => {
+        db.get(reqSql, (err, rows) => {
+            if (err) {
+                console.log(err.message);
+                return reject(err);
+            }
+            if (rows) {
+                console.log(rows);
+                resolve(rows);
+            }
+        });
+    });
+}
 
 (async () => {
     try {
@@ -89,4 +124,4 @@ function getUserById(userId) {
 })();
 
 
-module.exports = { connexion, login, getUserById }; // partager la fonctions connexion
+module.exports = { connexion, login, getUserById, ajouterUser,listUsers }; // partager la fonctions connexion
