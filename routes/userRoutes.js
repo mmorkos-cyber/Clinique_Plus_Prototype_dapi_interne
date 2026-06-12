@@ -9,7 +9,6 @@ const userController = require("../controllers/userController");
 // connexion user
 router.post("/login", userController.login);
 
-
 // rechercher un user avec son ID 
 router.get('/:userId', userController.getUserById);
 
@@ -17,9 +16,15 @@ router.get('/:userId', userController.getUserById);
 
 router.post("/add-user", userController.ajouterUser);
 
-// Lister les utilisateurs 
+// supprimer un utilisateur 
+router.delete('/suppression/:userId', userController.deleteUserRoute);
 
-router.get("/all", userController.listUsers);
+// Lister les utilisateurs 
+router.get("/", userController.listUsersRoute);
+
+// Mise à jour user
+router.put("/update", userController.majUserRoute);
+
 
 module.exports = router;
 

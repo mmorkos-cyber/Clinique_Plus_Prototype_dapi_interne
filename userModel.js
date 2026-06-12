@@ -97,20 +97,50 @@ function ajouterUser(mail, password, role) {
 }
 
 function listUsers() {
-     let reqSql = `select id,mail,role from users`;
     return new Promise((resolve, reject) => {
-        db.get(reqSql, (err, rows) => {
+        db.all("SELECT id, mail, role FROM users", (err, rows) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(rows);
+        });
+    });
+}
+
+function deleteUser(userId) {
+    const reqSql = `DELETE FROM users WHERE id = ?`;
+
+    return new Promise((resolve, reject) => {
+        db.run(reqSql, [userId], function (err) {
             if (err) {
                 console.log(err.message);
                 return reject(err);
             }
-            if (rows) {
-                console.log(rows);
-                resolve(rows);
-            }
+            resolve({
+                changes: this.changes  // 1 Suppression effective, 0 Erreur de suppression 
+            });
         });
     });
 }
+// Maj 
+
+function majUser(mail, password, role, id) {
+    return new Promise((resolve, reject) => {
+        db.run("UPDATE users set mail=?, password=?,role=? where id=?;",
+            [mail, password, role, id], function (err) {
+                if (err) {
+                    console.log(err.message);
+                    return reject(err);
+                }
+                else {
+                    resolve({
+                        changes: this.changes  // 1 maj effective, 0 non effectué 
+                    });
+                }
+            });
+    });
+}
+
 
 (async () => {
     try {
@@ -124,4 +154,4 @@ function listUsers() {
 })();
 
 
-module.exports = { connexion, login, getUserById, ajouterUser,listUsers }; // partager la fonctions connexion
+module.exports = { connexion, login, getUserById, ajouterUser, listUsers, deleteUser, majUser }; // partager la fonctions connexion
