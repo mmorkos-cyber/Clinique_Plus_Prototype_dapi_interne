@@ -15,8 +15,6 @@ const sqlCreate = `CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL
 );`;
 
-const sqlInsert = `INSERT OR IGNORE INTO users (mail, password, role)
-VALUES ('admin@cliniqueplus.fr', 'azerty', 'admin'),('secretaire@cliniqueplus.fr', 'azerty', 'staff');`;
 
 function executer(sql) {
 
@@ -47,19 +45,31 @@ function fermerConnexion() {
     });
 }
 
+(async () => {
+    try {
+        await executer(sqlCreate);
+        //await fermerConnexion();
+    }
+    catch (err) {
+        console.log(err);
+    }
+})();
+
+
 
 function login(mail, password) {
     let reqSql = `select id,mail,role from users where mail=? and password=?`;
     return new Promise((resolve, reject) => {
         db.get(reqSql, [mail, password], (err, rows) => {
             if (err) {
-                console.log(err.message);
+                console.log("Erreur de connexion", err);
                 return reject(err);
             }
-            if (rows) {
-                console.log(rows);
-                resolve(rows);
+            if (!rows) {
+                resolve(null);
             }
+            console.log(rows);
+            resolve(rows);
         });
     });
 }
@@ -72,10 +82,11 @@ function getUserById(userId) {
                 console.log(err.message);
                 return reject(err);
             }
-            if (rows) {
-                console.log(rows);
-                resolve(rows);
-            }
+            if (!rows) { resolve(null) }
+
+            console.log(rows);
+            resolve(rows);
+
         });
     });
 }
@@ -89,7 +100,6 @@ function ajouterUser(mail, password, role) {
                     return reject(err);
                 }
                 else {
-                    console.log("Utilisateur ajouté avec succés");
                     resolve(this.lastID);
                 }
             });
@@ -98,9 +108,12 @@ function ajouterUser(mail, password, role) {
 
 function listUsers() {
     return new Promise((resolve, reject) => {
-        db.all("SELECT id, mail, role FROM users", (err, rows) => {
+        db.all("SELECT id, mail,password, role FROM users", (err, rows) => {
             if (err) {
                 return reject(err);
+            }
+            if (!rows) {
+                resolve(null);
             }
             resolve(rows);
         });
@@ -142,16 +155,5 @@ function majUser(mail, password, role, id) {
 }
 
 
-(async () => {
-    try {
-        await executer(sqlCreate);
-        await executer(sqlInsert);
-        //await fermerConnexion();
-    }
-    catch (err) {
-        console.log(err);
-    }
-})();
 
-
-module.exports = { connexion, login, getUserById, ajouterUser, listUsers, deleteUser, majUser }; // partager la fonctions connexion
+module.exports = { connexion, login, getUserById, ajouterUser, listUsers, deleteUser, majUser }; // partager les fonctions 

@@ -5,42 +5,53 @@ const { login, getUserById, ajouterUser, listUsers, deleteUser, majUser } = requ
 exports.login = async (req, res) => {
     const mail = req.body.mail;
     const password = req.body.password;
-    const user = await login(mail, password);
+    try {
+        if (!mail || !password) {
+            return res.status(400).json({ "message": "le mail et le mot de passe sont obligatoires" });
 
-    if (!user) {
-        return res.status(500).json({ "message": "Erreur base de données" });
-    }
-
-    return res.status(200).json({
-        "message": "Connexion réussie",
-        "user": {
-            "id": user.id,
-            "mail": user.mail,
-            "role": user.role
         }
-    });
+        const user = await login(mail, password);
+        if (!user) {
+            return res.status(401).json({ "message": "Email ou Mot de passe incorrecte" });
+        }
+
+        return res.status(200).json({
+            "message": "Connexion réussie",
+            "user": {
+                "id": user.id,
+                "mail": user.mail,
+                "role": user.role
+            }
+        });
+    } catch (err) {
+        console.log("Erreur login", err);
+    }
 }
 
 
 // rechercher un user avec son ID 
 exports.getUserById = async (req, res) => {
     const userId = req.params.userId;
+    try {
 
-    const user = await getUserById(userId);
+        const user = await getUserById(userId);
 
-    if (!user) {
-        return res.status(500).json({ "message": "Erreur base de données" });
-    }
-
-    return res.status(200).json({
-        "message": "Utilisateur trouvé",
-        "user": {
-            "id": user.id,
-            "mail": user.mail,
-            "role": user.role
+        if (!user) {
+            return res.status(400).json({ "message": "Utilisateur non trouvé" });
         }
-    });
 
+        return res.status(200).json({
+            "message": "Utilisateur trouvé",
+            "user": {
+                "id": user.id,
+                "mail": user.mail,
+                "role": user.role
+            }
+        });
+    }
+    catch (err) {
+        console.log("Erreur Recherche utilisateur", err);
+    }
 }
 
 
@@ -50,14 +61,15 @@ exports.ajouterUser = async (req, res) => {
     const password = req.body.password;
     const role = req.body.role;
 
-    const user = await ajouterUser(mail, password, role);
-    if (!user) {
-        return res.status(500).json({
-            message: "Erreur base de données"
+    if (!mail || !password || !role) {
+        return res.status(400).json({
+            message: "Le mail, le mot de passe et le role sont obligatoires"
         });
     }
+    const user = await ajouterUser(mail, password, role);
+
     if (user == 0)
-        return res.status(500).json({ "message": "Utilisateur non ajouté" });
+        return res.status(401).json({ "message": "Utilisateur non ajouté" });
 
     return res.status(200).json({
         "message": "Utilisateur ajouté avec succés",
@@ -89,7 +101,7 @@ exports.deleteUserRoute = async (req, res) => {
     const userId = req.params.userId;
     const result = await deleteUser(userId);
     if (result.changes != 1) { // 1 Suppression effective, 0 Erreur de suppression 
-        return res.status(500).json({ "message": "Identifiant inexistant" });
+        return res.status(401).json({ "message": "Identifiant user inexistant" });
     }
     return res.status(200).json({
         "message": "Utilisateur supprimé avec succés",
@@ -102,9 +114,14 @@ exports.majUserRoute = async (req, res) => {
     const password = req.body.password;
     const role = req.body.role;
     const id = req.body.id;
+
+    if (!mail || !password || !role) {
+        return res.status(400).json({ "message": "Le mail, le mot de passe et le role sont obligatoires" });
+    }
     const result = await majUser(mail, password, role, id);
-    if (result.changes != 1) {  // 1 Suppression effective, 0 Erreur de suppression 
-        return res.status(500).json({ "message": "erreur de mise à jour" });
+
+    if (result.changes != 1) {  // 1 maj effective, 0 Erreur de maj 
+        return res.status(401).json({ "message": "erreur de mise à jour" });
     }
     return res.status(200).json({
         "message": "Utilisateur mis à jour avec succés",
